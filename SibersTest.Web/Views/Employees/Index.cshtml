@@ -1,0 +1,159 @@
+
+@model IEnumerable<SibersTest.Services.DTOs.EmployeeDto>
+@{
+    int pageSize = 25; 
+    int pageNumber = 1;
+    var request = ViewContext.HttpContext.Request;
+    if (request.Query.ContainsKey("page"))
+    {
+        int.TryParse(request.Query["page"], out pageNumber);
+        if (pageNumber < 1) pageNumber = 1;
+    }
+    var total = Model.Count();
+    var totalPages = (int)Math.Ceiling((double)total / pageSize);
+    var paged = Model.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+}
+
+<h1>Employees</h1> <!-- Page title -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var emp in paged)
+        {
+            <tr>
+                <td>@emp.FullName</td>
+                <td>@emp.Email</td>
+                <td>
+                    <button onclick="editEmployee(@emp.Id)" class="btn btn-sm btn-primary">Edit</button>
+                    <button onclick="deleteEmployee(@emp.Id)" class="btn btn-sm btn-danger">Remove</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+
+
+
+<div class="modal fade" id="employeeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Employee</h5> <!-- Modal title -->
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="employeeForm">
+                    <input type="hidden" id="empId" name="Id" value="0" />
+                    <div class="mb-3">
+                        <label>Full Name</label>
+                        <input type="text" id="empFullName" name="FullName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label>Email</label>
+                        <input type="email" id="empEmail" name="Email" class="form-control" required />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveEmployee()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    @if (pageNumber > 1)
+    {
+        <a href="?page=@(pageNumber-1)">Previous @pageSize</a>
+    }
+    @if (pageNumber < totalPages)
+    {
+        if (pageNumber > 1) { <span> | </span> }
+        <a href="?page=@(pageNumber+1)">Next @pageSize</a>
+    }
+    <span style="margin-left:10px;">Page @pageNumber of @totalPages</span>
+</div>
+
+@section Scripts {
+    <script>
+        // Delete employee by id
+        async function deleteEmployee(id) {
+    if (!confirm('Delete employee?')) return;
+
+    const response = await fetch(`/api/employees/delete/${id}`, {
+        method: 'POST'
+    });
+
+    if (response.ok) {
+        location.reload(); // Reload page after delete
+    } else {
+        alert('Delete error: ' + response.status);
+    }
+}
+
+// Initialize Bootstrap modal
+const empModal = new bootstrap.Modal(document.getElementById('employeeModal'));
+
+// Show empty form for create
+function showEmployeeModal() {
+    document.getElementById('employeeForm').reset();
+    document.getElementById('empId').value = "0";
+    document.getElementById('modalTitle').innerText = "Add employee";
+    empModal.show();
+}
+
+// Show form with data for edit
+async function editEmployee(id) {
+    const response = await fetch(`/api/employees/${id}`);
+    if (response.ok) {
+        const emp = await response.json();
+        document.getElementById('empId').value = emp.id;
+        document.getElementById('empFullName').value = emp.fullName;
+        document.getElementById('empEmail').value = emp.email;
+        document.getElementById('modalTitle').innerText = "Edit employee";
+        empModal.show();
+    }
+}
+
+async function saveEmployee() {
+    // Collect data from modal fields
+    const id = document.getElementById('empId').value;
+    const fullName = document.getElementById('empFullName').value;
+    const email = document.getElementById('empEmail').value;
+
+    const employeeData = {
+        id: parseInt(id),
+        fullName: fullName,
+        email: email
+    };
+
+    // Send to API method
+    const response = await fetch('/api/employees/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(employeeData)
+    });
+
+    if (response.ok) {
+        empModal.hide(); // Hide modal
+        location.reload(); // Reload list
+    } else {
+        const errorData = await response.json();
+        alert('Save error. Check input data.');
+        console.error(errorData);
+    }
+}
+    </script>
+}

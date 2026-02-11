@@ -1,0 +1,111 @@
+
+@model IEnumerable<SibersTest.Services.DTOs.ProjectListItemDto>
+@{
+    int pageSize = 10;
+    int pageNumber = 1;
+    var request = ViewContext.HttpContext.Request;
+    if (request.Query.ContainsKey("page"))
+    {
+        int.TryParse(request.Query["page"], out pageNumber);
+        if (pageNumber < 1) pageNumber = 1;
+    }
+    var total = Model.Count();
+    var totalPages = (int)Math.Ceiling((double)total / pageSize);
+    var paged = Model.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+}
+
+@Html.AntiForgeryToken()
+
+<h1>Projects</h1>
+
+<form method="get" style="margin-bottom: 20px;">
+    <input type="text" name="search" placeholder="Search projects" class="form-control" value="@request.Query["search"]" />
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+<ul>
+@foreach (var proj in paged)
+{
+    
+
+    
+    <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px;">
+
+
+        <strong>@proj.Name</strong>
+        <div style="margin-left: 20px; margin-top: 8px;">
+            <p><strong>Customer:</strong> @proj.CustomerCompany</p>
+            <p><strong>Executor:</strong> @proj.ExecutorCompany</p>
+            <p><strong>Period:</strong> @proj.StartDate.ToString("yyyy-MM-dd") - @proj.EndDate.ToString("yyyy-MM-dd")</p>
+            <p><strong>Manager:</strong> <a href="/api/employees/@proj.ManagerId">@proj.ManagerFullName</a></p>
+            <p><strong>Team Size:</strong> @proj.EmployeeCount employees</p>
+            <p><strong>Priority:</strong> @proj.Priority</p>
+            @if (proj.Files != null && proj.Files.Any())
+            {
+                <p><strong>Attached Files:</strong></p>
+                <ul>
+                    @foreach (var file in proj.Files)
+                    {
+                        <li><a href="/uploads/@file" target="_blank">@file</a></li>
+                    }
+                </ul>
+            }
+        </div>
+        <a asp-controller="Projects" asp-action="Edit" asp-route-id="@proj.Id" class="btn btn-primary">
+    Edit
+</a>
+<!-- make buttons same -->
+        
+        <button onclick="deleteProject(@proj.Id)" class="btn btn-sm btn-danger mt-2">
+    Delete project
+</button>
+
+<script>
+async function deleteProject(id) {
+    if (!confirm('Are you sure?')) return;
+
+    // Достаем токен со страницы
+    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+    const response = await fetch(`/api/projects/delete/${id}`, {
+        method: 'POST',
+        headers: {
+            // Добавляем токен в заголовок
+            "RequestVerificationToken": token
+        }
+    });
+
+    if (response.ok) {
+        location.reload();
+    } 
+    else {
+        console.error('Status:', response.status);
+        alert('Error: ' + response.statusText);
+    }
+}
+</script>
+
+
+    </div>
+}
+</ul>
+
+@{
+    // Save search term for pagination links
+    var searchTerm = request.Query["search"];
+}
+
+<div>
+    @if (pageNumber > 1)
+    {
+        <a href="?page=@(pageNumber-1)&search=@searchTerm">Previous</a>
+    }
+    
+    @if (pageNumber < totalPages)
+    {
+        if (pageNumber > 1) { <span> | </span> }
+        <a href="?page=@(pageNumber+1)&search=@searchTerm">Next</a>
+    }
+    
+    <span style="margin-left:10px;">Page @pageNumber of @totalPages</span>
+</div>

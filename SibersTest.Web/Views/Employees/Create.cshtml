@@ -1,0 +1,28 @@
+﻿@model SibersTest.Services.DTOs.EmployeeFormDto
+
+
+@{
+if(Model.Id == 0) {
+    ViewData["Title"] = "Create Employee";
+} else {
+    ViewData["Title"] = "Edit Employee";
+}
+}
+
+
+<h1>@ViewData["Title"]</h1>
+
+<form method="post">
+    <div class="form-group">
+        <label asp-for="FullName"></label>
+        <input asp-for="FullName" class="form-control" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
