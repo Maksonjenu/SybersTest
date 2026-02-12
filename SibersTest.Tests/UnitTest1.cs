@@ -15,6 +15,7 @@ public class ServicesTests
 
     [Test]
     [TestCase("John Doe", "john.doe@example.com", 1)]
+    [TestCase("", "", 0)]
     public async Task CreateEmployee_ShoudSaveInDb(string fullName, string email, int expectedCount)
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
