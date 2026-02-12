@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SibersTest.Web", "SibersTes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SibersTest.Services", "SibersTest.Services\SibersTest.Services.csproj", "{CCF8E980-410A-4BFB-A199-0F7F69964070}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SibersTest.Tests", "SibersTest.Tests\SibersTest.Tests.csproj", "{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,18 @@ Global
 		{CCF8E980-410A-4BFB-A199-0F7F69964070}.Release|x64.Build.0 = Release|Any CPU
 		{CCF8E980-410A-4BFB-A199-0F7F69964070}.Release|x86.ActiveCfg = Release|Any CPU
 		{CCF8E980-410A-4BFB-A199-0F7F69964070}.Release|x86.Build.0 = Release|Any CPU
+		{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}.Debug|x64.Build.0 = Debug|Any CPU
+		{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}.Debug|x86.Build.0 = Debug|Any CPU
+		{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}.Release|x64.ActiveCfg = Release|Any CPU
+		{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}.Release|x64.Build.0 = Release|Any CPU
+		{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}.Release|x86.ActiveCfg = Release|Any CPU
+		{C4E5F5A8-5A33-4FED-813A-F8D87CC96B30}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
