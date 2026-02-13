@@ -59,6 +59,8 @@ namespace SibersTest.Services.Services
 
             ValidateFullName(dto.FullName);
 
+            ValidateEmail(dto.Email);
+
             var (firstName, lastName, patronymic) = ParseFullName(dto.FullName);
 
             var employee = new Employee
@@ -153,6 +155,16 @@ namespace SibersTest.Services.Services
         {
             if (string.IsNullOrWhiteSpace(fullName))
                 throw new ArgumentException("FullName cannot be empty.", nameof(fullName));
+        }
+
+        private void ValidateEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email cannot be empty.", nameof(email));
+
+            // Simple email format validation
+            if (!email.Contains("@") || !email.Contains("."))
+                throw new ArgumentException("Email format is invalid.", nameof(email));
         }
         #endregion
     }
