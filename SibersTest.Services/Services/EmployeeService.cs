@@ -147,6 +147,9 @@ namespace SibersTest.Services.Services
             string lastName = parts.Length > 1 ? parts[1] : string.Empty;
             string patronymic = parts.Length > 2 ? string.Join(' ', parts.Skip(2)) : string.Empty;
 
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
+                throw new ArgumentException("FullName must contain at least first name and last name.", nameof(fullName));
+
             return (firstName, lastName, patronymic);
         }
 
