@@ -62,4 +62,41 @@ public class EmployeeService_Tests
         }
 
     }
+
+
+    [Test]
+    [TestCase(2, "John", "Doe", "Smith", "john.doe@example.com", "Jane", "Smith", "Johnson", "jane.smith@example.com")]
+    [TestCase(1, "Иван", "Иванов", "Иванович", "ivan.ivanov@example.com")]
+    [TestCase(3, "Alex", "Brown", "", "alex.brown@example.com", "Maria", "White", "", "maria.white@example.com", "Sergey", "Petrov", "", "sergey.petrov@example.com")]
+    [TestCase(0)]
+    public async Task GetAllEmployees_ShouldReturnAllEmployees(int expectedCount,
+        params string[] employeeData)
+    {
+        using (var context = new ApplicationDbContext(_options))
+        {
+            var employees = new List<Employee>();
+            for (int i = 0; i + 3 < employeeData.Length; i += 4)
+            {
+                if (!string.IsNullOrEmpty(employeeData[i]))
+                {
+                    employees.Add(new Employee
+                    {
+                        FirstName = employeeData[i],
+                        LastName = employeeData[i + 1],
+                        Patronymic = employeeData[i + 2],
+                        Email = employeeData[i + 3]
+                    });
+                }
+            }
+            context.Employees.AddRange(employees);
+            context.SaveChanges();
+        }
+
+        using (var context = new ApplicationDbContext(_options))
+        {
+            var service = new EmployeeService(context);
+            var employees = await service.GetAllAsync();
+            Assert.That(employees.Count(), Is.EqualTo(expectedCount));
+        }
+    }
 }
