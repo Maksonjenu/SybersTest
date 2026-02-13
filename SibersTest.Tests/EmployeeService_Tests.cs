@@ -6,11 +6,17 @@ using SibersTest.Services.Services;
 namespace SibersTest.Tests;
 
 [TestFixture]
-public class ServicesTests
+public class EmployeeService_Tests
 {
+
+    private DbContextOptions<ApplicationDbContext> _options;
+
     [SetUp]
     public void Setup()
     {
+        _options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        .Options;
     }
 
     [Test]
@@ -23,17 +29,22 @@ public class ServicesTests
     [TestCase("", "johndoeexample.com", 0)]
     [TestCase("", "johndoe@examplecom", 0)]
     [TestCase("", "@.", 0)]
+    // Дополнительные кейсы
+    [TestCase("Иван Иванов Иванович", "ivan.ivanov@example.com", 1)]
+    [TestCase("Иван Иванов", "ivan.ivanov@example.com", 1)]
+    [TestCase("Ivan Ivanov", "ivanov@", 0)]
+    [TestCase("Ivan Ivanov", "ivanov@domain", 0)]
+    [TestCase("Ivan Ivanov", "ivanov@domain.", 0)]
+    [TestCase("Ivan Ivanov", "ivanov@.com", 0)]
+    [TestCase("Ivan Ivanov", "ivanov@domain.c", 1)]
+    [TestCase("Ivan Ivanov", "ivanov@domain.co.uk", 1)]
+    [TestCase("Ivan Ivanov", "ivanov@domain..com", 0)]
 
 
     public async Task CreateEmployee_ShoudSaveInDb(string fullName, string email, int expectedCount)
 
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-        .Options;
-
-        // 2. Юзаем контекст
-        using (var context = new ApplicationDbContext(options))
+        using (var context = new ApplicationDbContext(_options))
         {
             var service = new EmployeeService(context);
             service.CreateAsync(new Services.DTOs.EmployeeFormDto
@@ -45,8 +56,7 @@ public class ServicesTests
             context.SaveChanges(); // Сохраняем изменения в базе данных
 
         }
-        // 3. Проверяем в новом контексте (имитируем новый запрос)
-        using (var context = new ApplicationDbContext(options))
+        using (var context = new ApplicationDbContext(_options))
         {
             Assert.That(context.Employees.Count(), Is.EqualTo(expectedCount));
         }
