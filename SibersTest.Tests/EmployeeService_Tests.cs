@@ -101,11 +101,11 @@ public class EmployeeService_Tests
     }
 
     [Test]
-    [TestCase(1, "John", "Doe", "Smith", "john.doe@example.com")]
-    [TestCase(2, "John", "Doe", "Smith", "john.doe@example.com", "Jane", "John", "Johnson", "jane.smith@example.com")]
-    [TestCase(2, "Иван", "Иванов", "Иванович", "ivan.ivanov@example.com", "Мария", "Иванова", "Петровна", "maria.ivanova@example.com")]
+    [TestCase(1, "John", "John", "Doe", "Smith", "john.doe@example.com")]
+    [TestCase(2, "John", "John", "Doe", "Smith", "john.doe@example.com", "Jane", "Smith", "Johnson", "jane.smith@example.com")]
+    [TestCase(2, "Иван", "Иван", "Иванов", "Петрович", "ivan.ivanov@example.com", "Мария", "Мария", "Иванова", "Петровна", "maria.ivanova@example.com")]
     public async Task SearchByName_ShouldReturnMatchingEmployees(int expectedCount,
-        params string[] employeeData)
+        string searchName, params string[] employeeData)
     {
         using (var context = new ApplicationDbContext(_options))
         {
@@ -130,8 +130,8 @@ public class EmployeeService_Tests
         using (var context = new ApplicationDbContext(_options))
         {
             var service = new EmployeeService(context);
-            var employees = await service.SearchByNameAsync("John");
-            Assert.That(employees.Count(), Is.EqualTo(1));
+            var employees = await service.SearchByNameAsync(searchName);
+            Assert.That(employees.Count(), Is.EqualTo(expectedCount));
         }
     }
 }
