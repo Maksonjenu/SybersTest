@@ -166,6 +166,15 @@ namespace SibersTest.Services.Services
                 throw new ArgumentException("Email cannot be empty.", nameof(email));
 
             // Simple email format validation
+
+            var emailParts = email.Split('@');
+            if (emailParts.Length != 2 || string.IsNullOrWhiteSpace(emailParts[0]) || string.IsNullOrWhiteSpace(emailParts[1]))
+                throw new ArgumentException("Email format is invalid.", nameof(email));
+
+            var domainParts = emailParts[1].Split('.');
+            if (domainParts.Length < 2 || domainParts.Any(string.IsNullOrWhiteSpace))
+                throw new ArgumentException("Email format is invalid.", nameof(email));
+
             if (!email.Contains("@") || !email.Contains("."))
                 throw new ArgumentException("Email format is invalid.", nameof(email));
         }
