@@ -102,8 +102,17 @@ public class EmployeeService_Tests
 
     [Test]
     [TestCase(1, "John", "John", "Doe", "Smith", "john.doe@example.com")]
-    [TestCase(2, "John", "John", "Doe", "Smith", "john.doe@example.com", "Jane", "Smith", "Johnson", "jane.smith@example.com")]
-    [TestCase(2, "Иван", "Иван", "Иванов", "Петрович", "ivan.ivanov@example.com", "Мария", "Мария", "Иванова", "Петровна", "maria.ivanova@example.com")]
+    [TestCase(1, "john", "John", "Doe", "Smith", "john.doe@example.com")]
+    [TestCase(
+        2,
+        "John", "John", "Doe", "Smith", "john.doe@example.com",
+        "Jane", "Smith", "Johnson", "jane.smith@example.com")
+    ]
+    [TestCase(
+        2,
+        "Иван", "Иван", "Иванов", "Петрович", "ivan.ivanov@example.com",
+        "Мария", "Мария", "Иванова", "Петровна", "maria.ivanova@example.com")
+    ]
     public async Task SearchByName_ShouldReturnMatchingEmployees(int expectedCount,
         string searchName, params string[] employeeData)
     {
