@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SibersTest.Core.Entities;
 using SibersTest.Infrastructure.Data;
+using SibersTest.Services.DTOs;
 using SibersTest.Services.Services;
 
 namespace SibersTest.Tests;
@@ -10,6 +11,7 @@ public class EmployeeService_Tests
 {
 
     private DbContextOptions<ApplicationDbContext> _options;
+    #region Setup
 
     [SetUp]
     public void Setup()
@@ -19,6 +21,9 @@ public class EmployeeService_Tests
         .Options;
     }
 
+    #endregion
+
+    #region CreateEmployeeTests
     [Test]
     [TestCase("John Doe", "john.doe@example.com", 1)]
     [TestCase("John ", "john.doe@example.com", 0)]
@@ -63,6 +68,9 @@ public class EmployeeService_Tests
 
     }
 
+    #endregion
+
+    #region GetAllEmployeesTest
 
     [Test]
     [TestCase(2, "John", "Doe", "Smith", "john.doe@example.com", "Jane", "Smith", "Johnson", "jane.smith@example.com")]
@@ -99,6 +107,10 @@ public class EmployeeService_Tests
             Assert.That(employees.Count(), Is.EqualTo(expectedCount));
         }
     }
+
+    #endregion
+
+    #region SearchByNameTests
 
     [Test]
     [TestCase(1, "John", "John", "Doe", "Smith", "john.doe@example.com")]
@@ -143,4 +155,47 @@ public class EmployeeService_Tests
             Assert.That(employees.Count(), Is.EqualTo(expectedCount));
         }
     }
+
+    #endregion
+
+    #region UpdateEmployeeTest
+
+    [Test]
+    public async Task UpdateEmployee_ShouldThrowInvalidValue()
+    {
+        using (var context = new ApplicationDbContext(_options))
+        {
+            var employee = new Employee
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                Patronymic = "Smith",
+                Email = "john.doe@example.com"
+            };
+            context.Employees.Add(employee);
+            context.SaveChanges();
+        }
+
+        using (var context = new ApplicationDbContext(_options))
+        {
+            var service = new EmployeeService(context);
+            var employee = await service.GetByIdAsync(1);
+
+            EmployeeFormDto employeeFormDto = new EmployeeFormDto
+            {
+                Id = employee.Id,
+                FullName = "Jane"
+            };
+
+            Assert.ThrowsAsync<ArgumentException>(async () =>
+            {
+                await service.UpdateAsync(employeeFormDto);
+            });
+
+        }
+
+
+    }
 }
+
+#endregion
