@@ -160,42 +160,98 @@ public class EmployeeService_Tests
 
     #region UpdateEmployeeTest
 
+/// <summary>
+/// Test case for <see cref="EmployeeService.UpdateAsync(EmployeeFormDto)"/>.
+/// Throws <see cref="ArgumentException"/> if the input is invalid.
+/// Verify that the employee is updated correctly.
+///
+/// <param name="updateFullName">New full name</param>
+/// <param name="updateEmail">New email</param>
+/// <param name="shouldThrow">Indicates whether the test method should throw an exception.</param>
+/// <param name="expectedFirst">Expected first name after update</param>
+/// <param name="expectedLast">Expected last name after update</param>
+/// <param name="expectedPatronymic">Expected patronymic after update</param>
+/// <returns></returns>
     [Test]
-    public async Task UpdateEmployee_ShouldThrowInvalidValue()
-    {
-        using (var context = new ApplicationDbContext(_options))
-        {
-            var employee = new Employee
-            {
-                FirstName = "John",
-                LastName = "Doe",
-                Patronymic = "Smith",
-                Email = "john.doe@example.com"
-            };
-            context.Employees.Add(employee);
-            context.SaveChanges();
-        }
+    // invalid full name (single token)
+    [TestCase("Jane", "jane.doe@example.com", true, "", "", "")]
+    // valid two-part name
+    [TestCase("Jane Doe", "jane.doe@example.com", false, "Jane", "Doe", "")]
+    // valid three-part name
+    [TestCase("Ivan Ivanov Ivanovich", "ivan.ivanov@example.com", false, "Ivan", "Ivanov", "Ivanovich")]
+    // empty full name
+    [TestCase("", "john.doe@example.com", true, "", "", "")]
+    // trailing space only / invalid
+    [TestCase("John ", "john.doe@example.com", true, "", "", "")]
+    // invalid email
+    [TestCase("John Doe", "invalid-email", true, "", "", "")]
+    // russian two-part valid
+    [TestCase("Мария Иванова", "maria.ivanova@example.com", false, "Мария", "Иванова", "")]
+    // multiple spaces should be normalized
+    [TestCase("John   Doe", "john.doe@example.com", false, "John", "Doe", "")]
+    // hyphen and apostrophe
+    [TestCase("Anna-Marie O'Neil", "anna.oneil@example.com", false, "Anna-Marie", "O'Neil", "")]
+    // three-part with middle name separated by space
+    [TestCase("Jean Luc Picard", "jean.picard@example.com", false, "Jean", "Luc", "Picard")]
+    public async Task UpdateEmployee_ParametrizedTests(string updateFullName, string updateEmail, bool shouldThrow, string expectedFirst, string expectedLast, string expectedPatronymic)
+     {
+         // Arrange - seed one employee
+         using (var context = new ApplicationDbContext(_options))
+         {
+             var employee = new Employee
+             {
+                 FirstName = "John",
+                 LastName = "Doe",
+                 Patronymic = "Smith",
+                 Email = "john.doe@example.com"
+             };
+             context.Employees.Add(employee);
+             context.SaveChanges();
+         }
+ 
+         using (var context = new ApplicationDbContext(_options))
+         {
+             var service = new EmployeeService(context);
+             var existing = await service.GetByIdAsync(1);
+ 
+             var dto = new EmployeeFormDto
+             {
+                 Id = existing.Id,
+                 FullName = updateFullName,
+                 Email = updateEmail
+             };
+ 
+             // Act & Assert
+             if (shouldThrow)
+             {
+                 Assert.ThrowsAsync<ArgumentException>(async () => await service.UpdateAsync(dto));
+             }
+             else
+             {
+                 await service.UpdateAsync(dto);
+                 var updated = await service.GetByIdAsync(existing.Id);
 
-        using (var context = new ApplicationDbContext(_options))
-        {
-            var service = new EmployeeService(context);
-            var employee = await service.GetByIdAsync(1);
+                string[] splittedNames = updated.FullName?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
 
-            EmployeeFormDto employeeFormDto = new EmployeeFormDto
-            {
-                Id = employee.Id,
-                FullName = "Jane"
-            };
+                string firstName = splittedNames.Length > 0 ? splittedNames[0] : "";
+                string lastName = splittedNames.Length > 1 ? splittedNames[1] : "";
+                string patronymic = splittedNames.Length > 2 ? splittedNames[2] : "";
 
-            Assert.ThrowsAsync<ArgumentException>(async () =>
-            {
-                await service.UpdateAsync(employeeFormDto);
-            });
+                 // Проверяем разделённые поля DTO
+                Assert.That(firstName ?? "", Is.EqualTo(expectedFirst ?? ""));
+                Assert.That(lastName ?? "", Is.EqualTo(expectedLast ?? ""));
+                Assert.That(patronymic ?? "", Is.EqualTo(expectedPatronymic ?? ""));
+                Assert.That(updated.Email, Is.EqualTo(updateEmail));
 
-        }
-
-
-    }
-}
-
-#endregion
+                // Дополнительно проверяем корректную склейку FullName (если поле присутствует в DTO)
+                 var expectedFullName = string.Join(" ", new[] { expectedFirst, expectedLast, expectedPatronymic }.Where(s => !string.IsNullOrEmpty(s)));
+                 if (updated.GetType().GetProperty("FullName") != null)
+                 {
+                     Assert.That(((updated.FullName ?? "").Trim()), Is.EqualTo(expectedFullName));
+                 }
+             }
+         }
+     }
+ 
+     #endregion
+ }
