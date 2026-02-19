@@ -80,6 +80,8 @@ namespace SibersTest.Services.Services
 
             ValidateFullName(dto.FullName);
 
+            ValidateEmail(dto.Email);
+
             var employee = await _context.Employees.FindAsync(dto.Id);
             if (employee == null)
                 throw new InvalidOperationException($"Employee with ID {dto.Id} not found.");
