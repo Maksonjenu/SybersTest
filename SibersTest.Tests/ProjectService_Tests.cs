@@ -25,9 +25,20 @@ public class ProjectService_Tests
 
     #region Create project test
     [Test]
-    [TestCase(0)]
+    [TestCase("Test Project", "Test Company", "Test Company", "1-1-1", "2-2-2", 0, 0, "Manager Full Name", 0)]
+    [TestCase("Test Project","Test Company","Test Company", "1-1-1", "2-2-2",0,0,"Manager Full Name",1)]
 
-    public async Task CreateProject_ShoudSaveInDb(int expectedCount)
+    public async Task CreateProject_ShoudSaveInDb(
+        string projectName,
+        string customerCompany,
+        string executorCompany,
+        DateTime startDate,
+        DateTime endDate,
+        int priority,
+        int managerId,
+        string managerFullName,
+        int expectedCount
+        )
     {
 
 
@@ -43,10 +54,6 @@ public class ProjectService_Tests
             context.SaveChanges(); // Сохраняем изменения в базе данных
 
         }
-
-
-
-
         using (var context = new ApplicationDbContext(_options))
         {
             Assert.That(context.Projects.Count(), Is.EqualTo(expectedCount), $"Shoud be {expectedCount}, now {context.Projects.Count()}");
