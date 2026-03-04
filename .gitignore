@@ -484,3 +484,4 @@ $RECYCLE.BIN/
 SibersTest.Web/wwwroot/uploads/
 *.bmp
 *.zip
+*.db
