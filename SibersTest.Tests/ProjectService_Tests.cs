@@ -52,7 +52,7 @@ public class ProjectService_Tests
 
 
     [Test]
-    [TestCase("Test Project", "Test Company", "Test Company", "1-1-1", "2-2-2", 0, 1, "Manager Full Name")]
+    [TestCase("Test Project", "Test Company", "Test Company", "1-1-1", "2-2-2", 0, 0, "Manager Full Name")]
     public async Task CreateProject_ShoudThrowException(
             string projectName,
             string customerCompany,
@@ -117,10 +117,17 @@ public class ProjectService_Tests
         )
     {
 
+            
 
 
         using (var context = new ApplicationDbContext(_options))
         {
+
+
+            var employeeService = new EmployeeService(context);
+
+            List<EmployeeDto> employees = (List<EmployeeDto>)await employeeService.GetAllAsync();
+
             var service = new ProjectService(context);
             service.CreateAsync(new ProjectFormDto
             {
@@ -131,7 +138,7 @@ public class ProjectService_Tests
                 EndDate = endDate,
                 Priority = priority,
                 ManagerId = managerId,
-                Employees = null,
+                Employees = employees,
                 ManagerFullName = managerFullName,
             }, "");
 
